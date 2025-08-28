@@ -37,5 +37,9 @@ func main() {
 		c.JSON(200, gin.H{"ok": true})
 	})
 
+	// 🔐 auth (must be present)
+	r.POST("/claim", ClaimUsernameHandler(client))
+	r.GET("/me", AuthRequired(), MeHandler())
+
 	r.Run(":8080")
 }
