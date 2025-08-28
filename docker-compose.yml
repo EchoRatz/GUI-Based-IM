@@ -8,5 +8,15 @@ services:
     volumes:
       - mongo-data:/data/db
 
+  backend:
+    build: ./backend
+    container_name: im-backend
+    environment:
+      - MONGO_URI=mongodb://mongo:27017
+    depends_on:
+      - mongo
+    ports:
+      - "8080:8080"
+
 volumes:
   mongo-data:
