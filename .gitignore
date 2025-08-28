@@ -1,0 +1,76 @@
+# ---- Go (backend) ----
+bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+*.log
+*.tmp
+vendor/
+
+# ---- Node / Frontend (React/Vite/Next/etc.) ----
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# build outputs
+dist/
+build/
+.cache/
+.next/
+out/
+coverage/
+*.tsbuildinfo
+
+# ---- Docker ----
+*.pid
+*.seed
+docker-compose.override.yml
+
+# ---- Environment & secrets ----
+.env
+.env.*
+*.key
+*.pem
+
+# ---- OS / System ----
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Icon?
+Desktop.ini
+
+# ---- IDE / Editors ----
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+*.swm
+
+# ---- Python (if teammates use scripts) ----
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+.venv/
+venv/
+env/
+
+# ---- Misc ----
+*.bak
+*.orig
+*.rej
+*.tmp
+*.temp
+*.log
+*.lock
