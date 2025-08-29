@@ -108,7 +108,7 @@ func ensureUserIndexes(ctx context.Context, db *mongo.Database) error {
 }
 
 // ClaimUsernameHandler implements passwordless "sign-in":
-// POST /claim  { "username": "alice_01" }
+// POST /claim  { "username": "minty_68" }
 func ClaimUsernameHandler(client *mongo.Client) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var in struct {
