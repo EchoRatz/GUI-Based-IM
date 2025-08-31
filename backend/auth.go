@@ -135,7 +135,13 @@ func ClaimUsernameHandler(client *mongo.Client) gin.HandlerFunc {
 		ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 		defer cancel()
 
-		db := client.Database("im")
+		//Kan Fix from "im"
+		dbName := os.Getenv("MONGO_DB")
+		if dbName == "" {
+			dbName = "chatdb" // default to your intended DB
+		}
+		db := client.Database(dbName)
+
 		_ = ensureUserIndexes(ctx, db)
 
 		res, err := db.Collection("users").InsertOne(ctx, doc)
