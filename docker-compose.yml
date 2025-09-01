@@ -1,22 +1,26 @@
 services:
-  mongo:
-    image: mongo:7.0.5 
-    container_name: im-mongo
-    restart: unless-stopped
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo-data:/data/db
+  
+  #mongo:
+    #image: mongo:7.0.5 
+    #container_name: im-mongo
+    #restart: unless-stopped
+    #ports:
+    #  - "27017:27017"
+    #volumes:
+    #  - mongo-data:/data/db
 
   backend:
     build: ./backend
     container_name: im-backend
     environment:
-      - MONGO_URI=mongodb://mongo:27017
-    depends_on:
-      - mongo
+      - MONGO_URI=${MONGO_URI} #For DB
+      - JWT_SECRET=${JWT_SECRET} #For server
+      - CORS_ORIGINS=${CORS_ORIGINS} #For frontend URL
+      - PORT=${PORT}
+    #depends_on:
+    #  - mongo
     ports:
       - "8080:8080"
 
-volumes:
-  mongo-data:
+#volumes:
+#  mongo-data:
