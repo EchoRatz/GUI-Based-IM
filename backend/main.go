@@ -41,5 +41,9 @@ func main() {
 	r.POST("/claim", ClaimUsernameHandler(client))
 	r.GET("/me", AuthRequired(), MeHandler())
 
-	r.Run(":8080")
+	// Conver
+	r.POST("/conversations", AuthRequired(), CreateConverHandler(client))
+	r.GET("/conversations", AuthRequired(), ListConverHandler(client))
+
+	r.Run(":8080") //OLOLOLOLLO
 }
