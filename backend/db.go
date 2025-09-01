@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
 	"time"
 
 	"go.mongodb.org/mongo-driver/mongo"
@@ -26,4 +27,12 @@ func connectMongo(uri string) *mongo.Client {
 
 	fmt.Println("✅ Connected to MongoDB")
 	return client
+}
+
+func getDB(client *mongo.Client) *mongo.Database {
+	name := os.Getenv("MONGO_DB")
+	if name == "" {
+		name = "chatdb" // default
+	}
+	return client.Database(name)
 }
