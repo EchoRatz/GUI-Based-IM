@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DICKCORD</title>
+    <style>
+        body { 
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; 
+            margin: 0; 
+            background: linear-gradient(135deg, #667eea 0%, #12134e 100%);
+            color: #e5e7eb;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container { 
+            max-width: 600px; 
+            min-height: 350px;
+            margin: 20px; 
+            padding: 32px 40px; 
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .header { 
+            text-align: center;
+            margin-bottom: 32px; 
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        h1 { 
+            font-size: 32px; 
+            margin: 0 0 8px 0;
+            font-weight: bold;
+            background: linear-gradient(45deg, #fff, #e0e7ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .subtitle {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+            margin: 0;
+        }
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            flex-grow: 1;
+            justify-content: center;
+        }
+        .input-group {
+            position: relative;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+            font-weight: 500;
+        }
+        input[type="text"] { 
+            width: 100%;
+            padding: 16px 20px; 
+            border-radius: 12px; 
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 16px;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+        input[type="text"]:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.15);
+        }
+        input[type="text"]::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        button { 
+            padding: 16px 24px; 
+            border-radius: 12px; 
+            border: 0; 
+            background: linear-gradient(45deg, #667eea, #667eea);
+            color: white; 
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(52, 211, 153, 0.4);
+        }
+        button:disabled {
+            background: rgba(255, 255, 255, 0.2);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .status {
+            text-align: center;
+            margin-top: 16px;
+            padding: 12px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            font-size: 14px;
+        }
+        .status.signed-in {
+            background: rgba(52, 211, 153, 0.2);
+            color: #03031d;
+        }
+        .status.not-signed-in {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.7);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>DICKCORD</h1>
+            <p class="subtitle">Connect and start chatting</p>
+        </div>
+
+        <div class="login-form">
+            <div class="input-group">
+                <label for="username">username</label>
+                <input id="username" type="text" placeholder="Enter your username (3-20 characters)" />
+            </div>
+            <button id="claimBtn">Let's chat</button>
+        </div>
+
+        <div class="status" id="status">Not signed in</div>
+    </div>
+    <script>
+    (function(){
+        const apiBase = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? 'http://localhost:8080' : `${location.origin}`;
+        const els = {
+            username: document.getElementById('username'),
+            claimBtn: document.getElementById('claimBtn'),
+            status: document.getElementById('status')
+        };
+
+        function getToken(){ return localStorage.getItem('jwt') || '' }
+        function setToken(t){ localStorage.setItem('jwt', t); renderState(); }
+        function renderState(){
+            const t = getToken();
+            if (t) {
+                els.status.textContent = 'Signed in and ready to chat!';
+                els.status.className = 'status signed-in';
+            } else {
+                els.status.textContent = 'Not signed in';
+                els.status.className = 'status not-signed-in';
+            }
+        }
+
+        async function claim(){
+            let u = (els.username.value || '').trim().toLowerCase();
+            const re = /^[a-zA-Z0-9_]{3,20}$/;
+            if(!u){ 
+                els.status.textContent = 'Please enter a username';
+                els.status.className = 'status not-signed-in';
+                return 
+            }
+            if(!re.test(u)){ 
+                els.status.textContent = 'Username must be 3-20 characters (letters, numbers, underscore)';
+                els.status.className = 'status not-signed-in';
+                return 
+            }
+            els.claimBtn.disabled = true;
+            els.claimBtn.textContent = 'Connecting...';
+            try{
+                const res = await fetch(apiBase + '/claim', { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ username: u }) });
+                let payload; let text;
+                try { payload = await res.json(); }
+                catch(_) { text = await res.text(); }
+                const data = payload ?? { raw: text };
+                if(!res.ok){ 
+                    els.status.textContent = 'Connection failed. Please try again.';
+                    els.status.className = 'status not-signed-in';
+                    return 
+                }
+                if(data.token){ setToken(data.token); }
+            }catch(e){ 
+                els.status.textContent = 'Network error. Please check your connection.';
+                els.status.className = 'status not-signed-in';
+            }
+            finally{ 
+                els.claimBtn.disabled = false; 
+                els.claimBtn.textContent = 'Let\'s chat'; 
+            }
+        }
+
+        els.claimBtn.addEventListener('click', claim);
+        
+        // Allow Enter key to submit
+        els.username.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                claim();
+            }
+        });
+        
+        renderState();
+    })();
+    </script>
+</body>
+</html>
