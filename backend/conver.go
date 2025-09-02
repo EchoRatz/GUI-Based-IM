@@ -82,7 +82,7 @@ func resolveUsernames(ctx context.Context, db *mongo.Database, usernames []strin
 	}
 	for _, name := range usernames {
 		if _, ok := found[name]; !ok {
-			return nil, errors.New("one or more usrname do not exitst")
+			return nil, errors.New("one or more username do not exist")
 		}
 	}
 	return ids, nil
@@ -128,8 +128,8 @@ func CreateConverHandler(client *mongo.Client) gin.HandlerFunc {
 		}
 
 		// ensure creator is included
-		createrUname := c.GetString("uname")
-		in.Members = append(in.Members, createrUname)
+		creatorUname := c.GetString("uname")
+		in.Members = append(in.Members, creatorUname)
 
 		// normalize & req >= 2
 		membersU := uniqLower(in.Members)
