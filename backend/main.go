@@ -49,6 +49,10 @@ func main() {
 	r.POST("/messages/:cid", AuthRequired(), SendMessageHandler(client))
 	r.GET("/messages/:cid", AuthRequired(), ListMessagesHandler(client))
 
+	// receipts
+	r.POST("/conversations/:cid/read", AuthRequired(), MarkReadHandler(client))
+	r.GET("/conversations/:cid/unread", AuthRequired(), UnreadCountHandler(client))
+
 	// Local Port
 	r.Run(":8080")
 }
