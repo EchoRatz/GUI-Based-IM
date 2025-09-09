@@ -82,7 +82,7 @@ func resolveUsernames(ctx context.Context, db *mongo.Database, usernames []strin
 	}
 	for _, name := range usernames {
 		if _, ok := found[name]; !ok {
-			return nil, errors.New("one or more usrname do not exitst")
+			return nil, errors.New("one or more username do not exist")
 		}
 	}
 	return ids, nil
@@ -102,6 +102,19 @@ func findExistingDM(ctx context.Context, db *mongo.Database, a, b primitive.Obje
 		return nil, nil
 	}
 	return &conv, err
+}
+
+func getLastMessage(ctx context.Context, db *mongo.Database, cid primitive.ObjectID) (*Message, error) {
+	var m Message
+	err := db.Collection("messages").FindOne(
+		ctx,
+		bson.M{"conversation_id": cid},
+		options.FindOne().SetSort(bson.D{{Key: "ts", Value: -1}}),
+	).Decode(&m)
+	if errors.Is(err, mongo.ErrNoDocuments) {
+		return nil, nil
+	}
+	return &m, err
 }
 
 // === Handlers ===
@@ -128,8 +141,8 @@ func CreateConverHandler(client *mongo.Client) gin.HandlerFunc {
 		}
 
 		// ensure creator is included
-		createrUname := c.GetString("uname")
-		in.Members = append(in.Members, createrUname)
+		creatorUname := c.GetString("uname")
+		in.Members = append(in.Members, creatorUname)
 
 		// normalize & req >= 2
 		membersU := uniqLower(in.Members)
@@ -193,18 +206,37 @@ func CreateConverHandler(client *mongo.Client) gin.HandlerFunc {
 }
 
 // GET /conversations
+
 func ListConverHandler(client *mongo.Client) gin.HandlerFunc {
+	type lastMsg struct {
+		ID       primitive.ObjectID `json:"id"`
+		SenderID primitive.ObjectID `json:"sender_id"`
+		Type     string             `json:"type"`
+		Body     string             `json:"body"`
+		Ts       int64              `json:"ts"`
+	}
+	type item struct {
+		ID        primitive.ObjectID `bson:"_id" json:"id"`
+		Title     string             `bson:"title" json:"title"`
+		Members   []Member           `bson:"members" json:"members"`
+		CreatedAt int64              `bson:"created_at" json:"created_at"`
+		Unread    int64              `json:"unread"`
+		LastMsg   *lastMsg           `json:"last_msg,omitempty"`
+	}
+
 	return func(c *gin.Context) {
 		uidHex, _ := c.Get("uid")
-		uid, err := mustObjectID(uidHex.(string))
+		uid, err := primitive.ObjectIDFromHex(uidHex.(string))
 		if err != nil {
 			c.JSON(401, gin.H{"error": "unauthorized"})
 			return
 		}
+
 		ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 		defer cancel()
 		db := getDB(client)
 
+		// 1. fetch all conver the usr is in
 		cur, err := db.Collection("conversations").Find(
 			ctx,
 			bson.M{"members.user_id": uid},
@@ -216,22 +248,74 @@ func ListConverHandler(client *mongo.Client) gin.HandlerFunc {
 		}
 		defer cur.Close(ctx)
 
-		type item struct {
-			ID        primitive.ObjectID `bson:"_id" json:"id"`
-			Title     string             `bson:"title" json:"title"`
-			Members   []Member           `bson:"members" json:"members"`
-			CreatedAt int64              `bson:"created_at" json:"created_at"`
-		}
-
-		out := make([]item, 0)
+		convs := make([]item, 0, 16)
+		ids := make([]primitive.ObjectID, 0, 16)
 		for cur.Next(ctx) {
 			var x item
 			if err := cur.Decode(&x); err != nil {
 				c.JSON(500, gin.H{"error": "decode error"})
 				return
 			}
-			out = append(out, x)
+			convs = append(convs, x)
+			ids = append(ids, x.ID)
 		}
-		c.JSON(200, out)
+
+		if len(convs) == 0 {
+			c.JSON(200, []item{})
+			return
+		}
+
+		// 2, load receipt for this user across all those conv -> map[cid]last_read_ts
+		recCur, err := db.Collection("receipts").Find(ctx, bson.M{
+			"user_id":         uid,
+			"conversation_id": bson.M{"&in": ids},
+		})
+		if err != nil {
+			c.JSON(500, gin.H{"error": "db error"})
+			return
+		}
+		type recDoc struct {
+			CID        primitive.ObjectID `bson:"conversation_id"`
+			LastReadTS int64              `bson:"last_read_ts"`
+		}
+		lastRead := make(map[primitive.ObjectID]int64, len(ids))
+		for recCur.Next(ctx) {
+			var r recDoc
+			if err := recCur.Decode(&r); err != nil {
+				c.JSON(500, gin.H{"error": "decode error"})
+				return
+			}
+			lastRead[r.CID] = r.LastReadTS
+		}
+		recCur.Close(ctx)
+
+		// 3. for each conver, compute unread + fetch last msg
+		for i := range convs {
+			cid := convs[i].ID
+			// unread
+			since := lastRead[cid] // default 0
+			n, err := db.Collection("messages").CountDocuments(ctx, bson.M{
+				"conversation_id": cid,
+				"ts":              bson.M{"$gt": since},
+			})
+			if err != nil {
+				c.JSON(500, gin.H{"error": "db error"})
+				return
+			}
+			convs[i].Unread = n
+
+			// last msg
+			if m, err := getLastMessage(ctx, db, cid); err == nil && m != nil {
+				convs[i].LastMsg = &lastMsg{
+					ID:       m.ID,
+					SenderID: m.SenderID,
+					Type:     m.Type,
+					Body:     m.Body,
+					Ts:       m.Ts,
+				}
+			}
+		}
+
+		c.JSON(200, convs)
 	}
 }
