@@ -182,3 +182,48 @@ func MeHandler() gin.HandlerFunc {
 		c.JSON(200, gin.H{"user_id": uid, "username": uname})
 	}
 }
+
+// ListUsersHandler: GET /users  (requires AuthRequired)
+func ListUsersHandler(client *mongo.Client) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		uid, _ := c.Get("uid")
+		uidObj, err := primitive.ObjectIDFromHex(uid.(string))
+		if err != nil {
+			c.JSON(401, gin.H{"error": "invalid user id"})
+			return
+		}
+
+		ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
+		defer cancel()
+
+		dbName := os.Getenv("MONGO_DB")
+		if dbName == "" {
+			dbName = "chatdb"
+		}
+		db := client.Database(dbName)
+
+		// Find all users except the current user
+		cur, err := db.Collection("users").Find(ctx, bson.M{
+			"_id": bson.M{"$ne": uidObj},
+		}, options.Find().SetSort(bson.D{{Key: "username", Value: 1}}))
+		if err != nil {
+			c.JSON(500, gin.H{"error": "db error"})
+			return
+		}
+		defer cur.Close(ctx)
+
+		var users []gin.H
+		for cur.Next(ctx) {
+			var user User
+			if err := cur.Decode(&user); err != nil {
+				continue
+			}
+			users = append(users, gin.H{
+				"id":       user.ID.Hex(),
+				"username": user.Username,
+			})
+		}
+
+		c.JSON(200, gin.H{"users": users})
+	}
+}

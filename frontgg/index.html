@@ -123,6 +123,491 @@
             background: rgba(255, 255, 255, 0.1);
             color: rgba(255, 255, 255, 0.7);
         }
+
+        /* Conversation Page Styles */
+        .conversation-page {
+            display: none;
+            width: 100%;
+            height: 100vh;
+            background: #1a1a1a;
+            color: #e5e7eb;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+        }
+
+        .conversation-page.active {
+            display: flex;
+        }
+
+        .sidebar {
+            width: 300px;
+            background: #2a2a2a;
+            border-right: 1px solid #404040;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .conversation-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .conversation-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .conversation-item:hover {
+            background: #404040;
+        }
+
+        .conversation-item.active {
+            background: #667eea;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #667eea;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+            margin-right: 12px;
+            color: white;
+        }
+
+        .conversation-name {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .main-chat {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #1a1a1a;
+        }
+
+        .chat-header {
+            padding: 20px;
+            border-bottom: 1px solid #404040;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #2a2a2a;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .conversation-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #e5e7eb;
+        }
+
+        .add-conversation-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            border: none;
+            background: #667eea;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+
+        .add-conversation-btn:hover {
+            background: #5a6fd8;
+        }
+
+        .logout-btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: none;
+            background: #ef4444;
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .logout-btn:hover {
+            background: #dc2626;
+        }
+
+        .messages-container {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .message {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            max-width: 70%;
+        }
+
+        .message.sent {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #667eea;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .message-content {
+            background: #2a2a2a;
+            padding: 12px 16px;
+            border-radius: 12px;
+            border-bottom-left-radius: 4px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .message.sent .message-content {
+            background: #667eea;
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message-sender {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 4px;
+        }
+
+        .message-input-container {
+            padding: 20px;
+            border-top: 1px solid #404040;
+            background: #2a2a2a;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .message-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid #404040;
+            border-radius: 8px;
+            background: #1a1a1a;
+            color: #e5e7eb;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .message-input:focus {
+            border-color: #667eea;
+        }
+
+        .send-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: #667eea;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: background-color 0.2s;
+        }
+
+        .send-btn:hover {
+            background: #5a6fd8;
+        }
+
+        .send-btn:disabled {
+            background: #404040;
+            cursor: not-allowed;
+        }
+
+        /* New Message Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #2a2a2a;
+            border-radius: 12px;
+            padding: 24px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 1px solid #404040;
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #404040;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #e5e7eb;
+            margin: 0;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .close-btn:hover {
+            background: #404040;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: #e5e7eb;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #404040;
+            border-radius: 8px;
+            background: #1a1a1a;
+            color: #e5e7eb;
+            font-size: 14px;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        .form-input:focus {
+            border-color: #667eea;
+        }
+
+        .user-list {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #404040;
+            border-radius: 8px;
+            background: #1a1a1a;
+        }
+
+        .user-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            border-bottom: 1px solid #404040;
+        }
+
+        .user-item:last-child {
+            border-bottom: none;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #667eea;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .user-name {
+            color: #e5e7eb;
+            font-size: 14px;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .invite-btn {
+            background: #10b981;
+            color: white;
+        }
+
+        .invite-btn:hover {
+            background: #059669;
+        }
+
+        .cancel-btn {
+            background: #ef4444;
+            color: white;
+        }
+
+        .cancel-btn:hover {
+            background: #dc2626;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px solid #404040;
+        }
+
+        .back-btn, .ok-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .back-btn {
+            background: #404040;
+            color: #e5e7eb;
+        }
+
+        .back-btn:hover {
+            background: #525252;
+        }
+
+        .ok-btn {
+            background: #10b981;
+            color: white;
+        }
+
+        .ok-btn:hover {
+            background: #059669;
+        }
+
+        .ok-btn:disabled {
+            background: #404040;
+            cursor: not-allowed;
+        }
+
+        .selected-members {
+            margin-top: 12px;
+            padding: 12px;
+            background: #1a1a1a;
+            border-radius: 8px;
+            border: 1px solid #404040;
+        }
+
+        .selected-members h4 {
+            margin: 0 0 8px 0;
+            color: #e5e7eb;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .selected-member {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #667eea;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            margin: 2px;
+        }
+
+        .remove-member {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 0;
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background-color 0.2s;
+        }
+
+        .remove-member:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
     </style>
 </head>
 <body>
@@ -142,13 +627,101 @@
 
         <div class="status" id="status">Not signed in</div>
     </div>
+
+    <!-- Conversation Page -->
+    <div class="conversation-page" id="conversationPage">
+        <!-- Left Sidebar -->
+        <div class="sidebar">
+            <div class="conversation-list" id="conversationList">
+                <!-- Conversation items will be populated here -->
+            </div>
+        </div>
+
+        <!-- Main Chat Area -->
+        <div class="main-chat">
+            <!-- Chat Header -->
+            <div class="chat-header">
+                <div class="conversation-title" id="currentConversationTitle">Select a conversation</div>
+                <div class="header-actions">
+                    <button class="add-conversation-btn" id="addConversationBtn" title="Add conversation">+</button>
+                    <button class="logout-btn" id="logoutBtn" title="Logout">Logout</button>
+                </div>
+            </div>
+
+            <!-- Messages Container -->
+            <div class="messages-container" id="messagesContainer">
+                <div style="text-align: center; color: #888; margin-top: 50px;">
+                    Select a conversation to start messaging
+                </div>
+            </div>
+
+            <!-- Message Input -->
+            <div class="message-input-container">
+                <input type="text" class="message-input" id="messageInput" placeholder="Type a message..." disabled>
+                <button class="send-btn" id="sendBtn" disabled>▶</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Message Modal -->
+    <div class="modal-overlay" id="newMessageModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">New Message</h3>
+                <button class="close-btn" id="closeModalBtn">&times;</button>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="conversationName">Conversation name:</label>
+                <input type="text" class="form-input" id="conversationName" placeholder="Enter conversation name">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="memberSearch">Member:</label>
+                <input type="text" class="form-input" id="memberSearch" placeholder="Search users...">
+            </div>
+            
+            <div class="user-list" id="userList">
+                <!-- User list will be populated here -->
+            </div>
+            
+            <div class="selected-members" id="selectedMembers" style="display: none;">
+                <h4>Selected Members:</h4>
+                <div id="selectedMembersList"></div>
+            </div>
+            
+            <div class="modal-actions">
+                <button class="back-btn" id="backBtn">Back</button>
+                <button class="ok-btn" id="okBtn" disabled>OK</button>
+            </div>
+        </div>
+    </div>
     <script>
     (function(){
         const apiBase = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? 'http://localhost:8080' : `${location.origin}`;
         const els = {
             username: document.getElementById('username'),
             claimBtn: document.getElementById('claimBtn'),
-            status: document.getElementById('status')
+            status: document.getElementById('status'),
+            container: document.querySelector('.container'),
+            conversationPage: document.getElementById('conversationPage'),
+            conversationList: document.getElementById('conversationList'),
+            currentConversationTitle: document.getElementById('currentConversationTitle'),
+            addConversationBtn: document.getElementById('addConversationBtn'),
+            logoutBtn: document.getElementById('logoutBtn'),
+            messagesContainer: document.getElementById('messagesContainer'),
+            messageInput: document.getElementById('messageInput'),
+            sendBtn: document.getElementById('sendBtn'),
+            // Modal elements
+            newMessageModal: document.getElementById('newMessageModal'),
+            closeModalBtn: document.getElementById('closeModalBtn'),
+            conversationName: document.getElementById('conversationName'),
+            memberSearch: document.getElementById('memberSearch'),
+            userList: document.getElementById('userList'),
+            selectedMembers: document.getElementById('selectedMembers'),
+            selectedMembersList: document.getElementById('selectedMembersList'),
+            backBtn: document.getElementById('backBtn'),
+            okBtn: document.getElementById('okBtn')
         };
 
         function getToken(){ return localStorage.getItem('jwt') || '' }
@@ -158,10 +731,79 @@
             if (t) {
                 els.status.textContent = 'Signed in and ready to chat!';
                 els.status.className = 'status signed-in';
+                // Show conversation page after successful login
+                showConversationPage();
             } else {
                 els.status.textContent = 'Not signed in';
                 els.status.className = 'status not-signed-in';
+                // Show login page
+                showLoginPage();
             }
+        }
+
+        function initializeApp() {
+            // Check if user is already signed in
+            const token = getToken();
+            if (token) {
+                // Try to get username from localStorage or prompt for it
+                currentUser = localStorage.getItem('currentUser') || '';
+                currentUserId = localStorage.getItem('currentUserId') || '';
+                if (!currentUser) {
+                    // Clear invalid token
+                    localStorage.removeItem('jwt');
+                    localStorage.removeItem('currentUserId');
+                    showLoginPage();
+                } else {
+                    showConversationPage();
+                }
+            } else {
+                showLoginPage();
+            }
+        }
+
+        function showLoginPage() {
+            els.container.style.display = 'flex';
+            els.conversationPage.classList.remove('active');
+            document.body.style.background = 'linear-gradient(135deg, #667eea 0%, #12134e 100%)';
+        }
+
+        function logout() {
+            // Clear all stored data
+            localStorage.removeItem('jwt');
+            localStorage.removeItem('currentUser');
+            localStorage.removeItem('currentUserId');
+            
+            // Reset variables
+            currentUser = '';
+            currentUserId = '';
+            currentConversationId = null;
+            conversations = [];
+            usernameMap.clear(); // Clear username mapping
+            
+            // Clear the username input
+            els.username.value = '';
+            
+            // Show login page
+            showLoginPage();
+            
+            // Update status
+            els.status.textContent = 'Not signed in';
+            els.status.className = 'status not-signed-in';
+            
+            console.log('User logged out successfully');
+        }
+
+        async function showConversationPage() {
+            els.container.style.display = 'none';
+            els.conversationPage.classList.add('active');
+            document.body.style.background = '#1a1a1a';
+            // Load users first
+            loadUsers();
+            // Initialize username mapping
+            initializeUsernameMap();
+            // Load conversations and setup event listeners
+            await loadConversations();
+            setupConversationEventListeners();
         }
 
         async function claim(){
@@ -190,7 +832,13 @@
                     els.status.className = 'status not-signed-in';
                     return 
                 }
-                if(data.token){ setToken(data.token); }
+                if(data.token){ 
+                    setToken(data.token);
+                    currentUser = u; // Store current user
+                    currentUserId = data.user?.id || ''; // Store current user ID
+                    localStorage.setItem('currentUser', u); // Persist username
+                    localStorage.setItem('currentUserId', currentUserId); // Persist user ID
+                }
             }catch(e){ 
                 els.status.textContent = 'Network error. Please check your connection.';
                 els.status.className = 'status not-signed-in';
@@ -201,6 +849,564 @@
             }
         }
 
+        // Conversation management functions
+        let currentUser = '';
+        let currentUserId = '';
+        let currentConversationId = null;
+        let conversations = [];
+        
+        // Username mapping for user IDs
+        let usernameMap = new Map();
+
+        function initializeUsernameMap() {
+            // Add current user to the mapping
+            if (currentUserId && currentUser) {
+                usernameMap.set(currentUserId, currentUser);
+            }
+            
+            // Map actual MongoDB ObjectIDs to real usernames
+            // These are the real user IDs from your database logs
+            const realUserMappings = {
+                // Exact ObjectIDs from your server logs
+                '68c659292ee9f09470a4a97f': 'putter',   // From server logs
+                '68b9978621852a964aa9beab': 'kan',      // From server logs
+                '68b9978121852a964aa9beaa': 'minty',    // From server logs
+                '68b996204c3f1c52b45fd18d': 'alex',     // From server logs
+                // Add more mappings as needed
+                '68c659292ee9f09470a4a980': 'sarah',
+                '68c659292ee9f09470a4a981': 'john',
+                '68c659292ee9f09470a4a982': 'emma'
+            };
+            
+            // Also add a global function to easily add new mappings
+            window.addUserMapping = function(userId, username) {
+                usernameMap.set(userId, username);
+                console.log(`Added mapping: ${userId} -> ${username}`);
+            };
+            
+            // Set up the mappings
+            Object.entries(realUserMappings).forEach(([objectId, username]) => {
+                usernameMap.set(objectId, username);
+            });
+        }
+
+        function getUsernameFromId(userId) {
+            // Debug: Log the user ID to help us identify patterns
+            console.log('Looking up username for ID:', userId);
+            
+            // First check our mapping
+            if (usernameMap.has(userId)) {
+                const username = usernameMap.get(userId);
+                console.log('✅ Found mapped username:', username);
+                return username;
+            }
+            
+            // If not found, try to extract username from the ID or create a friendly fallback
+            // For MongoDB ObjectIDs, we'll create a more friendly fallback
+            if (userId && userId.length === 24) {
+                // Try to decode or create a username from the ObjectID
+                const fallbackUsername = 'user' + userId.slice(-4);
+                console.log('⚠️  UNMAPPED ObjectID:', userId, '→ Created fallback:', fallbackUsername);
+                console.log('💡 To fix this, add: addUserMapping("' + userId + '", "username")');
+                usernameMap.set(userId, fallbackUsername);
+                return fallbackUsername;
+            }
+            
+            // For other cases, use a simple fallback
+            const fallbackUsername = 'user' + Math.floor(Math.random() * 1000);
+            console.log('⚠️  Unknown ID format:', userId, '→ Created fallback:', fallbackUsername);
+            usernameMap.set(userId, fallbackUsername);
+            return fallbackUsername;
+        }
+        
+        // Helper function to manually map user IDs to usernames
+        function mapUserIdToUsername(userId, username) {
+            usernameMap.set(userId, username);
+            console.log(`Mapped ${userId} to ${username}`);
+        }
+        
+        // Modal management
+        let allUsers = [];
+        let selectedUsers = [];
+        let filteredUsers = [];
+
+        async function loadConversations() {
+            try {
+                const response = await fetch(apiBase + '/conversations', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': 'Bearer ' + getToken()
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to load conversations');
+                }
+                
+                const backendConversations = await response.json();
+                
+                // Convert backend format to frontend format
+                conversations = backendConversations.map(conv => ({
+                    id: conv.id,
+                    name: conv.title,
+                    members: conv.members,
+                    lastMessage: conv.last_msg ? conv.last_msg.body : 'No messages yet',
+                    unread: conv.unread || 0
+                }));
+                
+                // Build username mapping from conversation members
+                conversations.forEach(conv => {
+                    conv.members.forEach(member => {
+                        if (!usernameMap.has(member.user_id)) {
+                            // If this is the current user, use their username
+                            if (member.user_id === currentUserId) {
+                                usernameMap.set(member.user_id, currentUser);
+                            } else {
+                                // For other users, try to find a matching username from our user list
+                                const matchingUser = allUsers.find(user => {
+                                    // Try direct username match first
+                                    return user.username === member.user_id;
+                                });
+                                
+                                if (matchingUser) {
+                                    usernameMap.set(member.user_id, matchingUser.username);
+                                } else {
+                                    // Create a fallback username based on the ObjectID
+                                    const fallbackUsername = 'user' + member.user_id.slice(-4);
+                                    usernameMap.set(member.user_id, fallbackUsername);
+                                }
+                            }
+                        }
+                    });
+                });
+                
+                renderConversationList();
+            } catch (error) {
+                console.error('Error loading conversations:', error);
+                conversations = [];
+                renderConversationList();
+            }
+        }
+
+        function renderConversationList() {
+            els.conversationList.innerHTML = '';
+            
+            if (conversations.length === 0) {
+                // Show empty state message
+                const emptyState = document.createElement('div');
+                emptyState.style.cssText = `
+                    text-align: center;
+                    padding: 20px;
+                    color: #888;
+                    font-size: 14px;
+                `;
+                emptyState.innerHTML = `
+                    <div>No conversations yet</div>
+                    <div style="margin-top: 8px; font-size: 12px;">Click + to create your first conversation</div>
+                `;
+                els.conversationList.appendChild(emptyState);
+                return;
+            }
+            
+            conversations.forEach(conv => {
+                const item = document.createElement('div');
+                item.className = 'conversation-item';
+                item.dataset.conversationId = conv.id;
+                
+                const firstLetter = conv.name.charAt(0).toUpperCase();
+                item.innerHTML = `
+                    <div class="avatar">${firstLetter}</div>
+                    <div class="conversation-name">${conv.name}</div>
+                `;
+                
+                item.addEventListener('click', () => selectConversation(conv.id));
+                els.conversationList.appendChild(item);
+            });
+        }
+
+        async function selectConversation(conversationId) {
+            currentConversationId = conversationId;
+            const conversation = conversations.find(c => c.id === conversationId);
+            
+            // Update UI
+            document.querySelectorAll('.conversation-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.querySelector(`[data-conversation-id="${conversationId}"]`).classList.add('active');
+            
+            els.currentConversationTitle.textContent = conversation.name;
+            els.messageInput.disabled = false;
+            els.sendBtn.disabled = false;
+            
+            // Load messages for this conversation
+            await loadMessages(conversationId);
+        }
+
+        async function loadMessages(conversationId) {
+            try {
+                const response = await fetch(apiBase + '/messages/' + conversationId + '?limit=50', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': 'Bearer ' + getToken()
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to load messages');
+                }
+                
+                const backendMessages = await response.json();
+                
+                // Convert backend format to frontend format
+                const messages = backendMessages.map(msg => {
+                    const senderId = msg.sender_id;
+                    const username = getUsernameFromId(senderId);
+                    
+                    return {
+                        id: msg.id,
+                        sender: username,
+                        senderId: senderId,
+                        content: msg.body,
+                        timestamp: new Date(msg.ts),
+                        isSent: senderId === currentUserId
+                    };
+                });
+                
+                renderMessages(messages);
+                
+            } catch (error) {
+                console.error('Error loading messages:', error);
+                // Show empty state on error
+                renderMessages([]);
+            }
+        }
+
+        function renderMessages(messages) {
+            els.messagesContainer.innerHTML = '';
+            
+            if (messages.length === 0) {
+                // Show empty state message
+                const emptyState = document.createElement('div');
+                emptyState.style.cssText = `
+                    text-align: center;
+                    color: #888;
+                    font-size: 14px;
+                    margin-top: 50px;
+                    padding: 20px;
+                `;
+                emptyState.innerHTML = `
+                    <div>No messages yet</div>
+                    <div style="margin-top: 8px; font-size: 12px;">Start the conversation by sending a message</div>
+                `;
+                els.messagesContainer.appendChild(emptyState);
+                return;
+            }
+            
+            messages.forEach(message => {
+                const messageEl = document.createElement('div');
+                messageEl.className = `message ${message.isSent ? 'sent' : ''}`;
+                
+                // For sent messages, use current user's name, for received messages use sender ID or "User"
+                const senderName = message.isSent ? currentUser : (message.sender || 'User');
+                const senderInitial = senderName.charAt(0).toUpperCase();
+                
+                messageEl.innerHTML = `
+                    <div class="message-avatar">${senderInitial}</div>
+                    <div>
+                        ${!message.isSent ? `<div class="message-sender">${senderName}</div>` : ''}
+                        <div class="message-content">${message.content}</div>
+                    </div>
+                `;
+                
+                els.messagesContainer.appendChild(messageEl);
+            });
+            
+            // Scroll to bottom
+            els.messagesContainer.scrollTop = els.messagesContainer.scrollHeight;
+        }
+
+        async function sendMessage() {
+            const messageText = els.messageInput.value.trim();
+            if (!messageText || !currentConversationId) return;
+            
+            try {
+                // Send message to backend API
+                const response = await fetch(apiBase + '/messages/' + currentConversationId, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + getToken()
+                    },
+                    body: JSON.stringify({
+                        type: 'text',
+                        body: messageText
+                    })
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to send message');
+                }
+                
+                const newMessage = await response.json();
+                
+                // Add message to UI
+                const messageEl = document.createElement('div');
+                messageEl.className = 'message sent';
+                
+                const userInitial = (currentUser || 'You').charAt(0).toUpperCase();
+                messageEl.innerHTML = `
+                    <div class="message-avatar">${userInitial}</div>
+                    <div>
+                        <div class="message-content">${messageText}</div>
+                    </div>
+                `;
+                
+                els.messagesContainer.appendChild(messageEl);
+                els.messageInput.value = '';
+                
+                // Scroll to bottom
+                els.messagesContainer.scrollTop = els.messagesContainer.scrollHeight;
+                
+                console.log('Message sent successfully:', newMessage);
+                
+            } catch (error) {
+                console.error('Error sending message:', error);
+                alert('Failed to send message: ' + error.message);
+            }
+        }
+
+        function addNewConversation() {
+            openNewMessageModal();
+        }
+
+        function openNewMessageModal() {
+            // Reset modal state
+            els.conversationName.value = '';
+            els.memberSearch.value = '';
+            selectedUsers = [];
+            filteredUsers = [...allUsers];
+            
+            // Load users (mock data for now)
+            loadUsers();
+            
+            // Show modal
+            els.newMessageModal.classList.add('active');
+            
+            // Focus on conversation name input
+            els.conversationName.focus();
+        }
+
+        function closeNewMessageModal() {
+            els.newMessageModal.classList.remove('active');
+        }
+
+        async function loadUsers() {
+            try {
+                const response = await fetch(apiBase + '/users', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': 'Bearer ' + getToken()
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to load users');
+                }
+                
+                const data = await response.json();
+                
+                // Convert backend format to frontend format
+                allUsers = data.users.map(user => ({
+                    id: user.id,
+                    username: user.username,
+                    name: user.username.charAt(0).toUpperCase() + user.username.slice(1)
+                }));
+                
+                // Update username mapping with real user data
+                allUsers.forEach(user => {
+                    usernameMap.set(user.id, user.username);
+                });
+                
+                filteredUsers = [...allUsers];
+                renderUserList();
+                
+                console.log('✅ Loaded real users from database:', allUsers);
+                console.log('✅ Updated username mapping:', Array.from(usernameMap.entries()));
+                
+            } catch (error) {
+                console.error('Error loading users:', error);
+                // Fallback to empty list on error
+                allUsers = [];
+                filteredUsers = [];
+                renderUserList();
+            }
+        }
+
+        function renderUserList() {
+            els.userList.innerHTML = '';
+            
+            filteredUsers.forEach(user => {
+                const userItem = document.createElement('div');
+                userItem.className = 'user-item';
+                
+                const isSelected = selectedUsers.some(selected => selected.username === user.username);
+                const buttonClass = isSelected ? 'cancel-btn' : 'invite-btn';
+                const buttonText = isSelected ? 'Cancel' : 'Invite';
+                
+                userItem.innerHTML = `
+                    <div class="user-info">
+                        <div class="user-avatar">${user.name.charAt(0).toUpperCase()}</div>
+                        <div class="user-name">${user.name}</div>
+                    </div>
+                    <button class="action-btn ${buttonClass}" onclick="toggleUser('${user.username}')">${buttonText}</button>
+                `;
+                
+                els.userList.appendChild(userItem);
+            });
+        }
+
+        function toggleUser(username) {
+            const user = allUsers.find(u => u.username === username);
+            if (!user) return;
+            
+            const existingIndex = selectedUsers.findIndex(u => u.username === username);
+            
+            if (existingIndex >= 0) {
+                // Remove user
+                selectedUsers.splice(existingIndex, 1);
+            } else {
+                // Add user
+                selectedUsers.push(user);
+            }
+            
+            renderUserList();
+            renderSelectedMembers();
+            updateOkButton();
+        }
+
+        function renderSelectedMembers() {
+            if (selectedUsers.length === 0) {
+                els.selectedMembers.style.display = 'none';
+                return;
+            }
+            
+            els.selectedMembers.style.display = 'block';
+            els.selectedMembersList.innerHTML = '';
+            
+            selectedUsers.forEach(user => {
+                const memberEl = document.createElement('div');
+                memberEl.className = 'selected-member';
+                memberEl.innerHTML = `
+                    ${user.name}
+                    <button class="remove-member" onclick="removeSelectedUser('${user.username}')">&times;</button>
+                `;
+                els.selectedMembersList.appendChild(memberEl);
+            });
+        }
+
+        function removeSelectedUser(username) {
+            selectedUsers = selectedUsers.filter(u => u.username !== username);
+            renderUserList();
+            renderSelectedMembers();
+            updateOkButton();
+        }
+
+        function updateOkButton() {
+            const hasName = els.conversationName.value.trim().length > 0;
+            const hasMembers = selectedUsers.length > 0;
+            els.okBtn.disabled = !(hasName && hasMembers);
+        }
+
+        function searchUsers() {
+            const query = els.memberSearch.value.toLowerCase();
+            filteredUsers = allUsers.filter(user => 
+                user.name.toLowerCase().includes(query) || 
+                user.username.toLowerCase().includes(query)
+            );
+            renderUserList();
+        }
+
+        async function createNewConversation() {
+            const conversationName = els.conversationName.value.trim();
+            if (!conversationName || selectedUsers.length === 0) return;
+            
+            try {
+                const members = selectedUsers.map(u => u.id); // Use user IDs from database
+                
+                const response = await fetch(apiBase + '/conversations', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + getToken()
+                    },
+                    body: JSON.stringify({
+                        title: conversationName,
+                        members: members
+                    })
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to create conversation');
+                }
+                
+                const newConv = await response.json();
+                
+                // Convert backend response to frontend format
+                const frontendConv = {
+                    id: newConv.id,
+                    name: newConv.title,
+                    members: newConv.members,
+                    lastMessage: 'No messages yet'
+                };
+                
+                conversations.unshift(frontendConv);
+                renderConversationList();
+                selectConversation(frontendConv.id);
+                closeNewMessageModal();
+                
+                console.log('Created conversation:', newConv);
+            } catch (error) {
+                console.error('Error creating conversation:', error);
+                alert('Failed to create conversation: ' + error.message);
+            }
+        }
+
+        function setupConversationEventListeners() {
+            els.addConversationBtn.addEventListener('click', addNewConversation);
+            els.logoutBtn.addEventListener('click', logout);
+            els.sendBtn.addEventListener('click', sendMessage);
+            
+            els.messageInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+
+            // Modal event listeners
+            els.closeModalBtn.addEventListener('click', closeNewMessageModal);
+            els.backBtn.addEventListener('click', closeNewMessageModal);
+            els.okBtn.addEventListener('click', createNewConversation);
+            
+            // Search functionality
+            els.memberSearch.addEventListener('input', searchUsers);
+            
+            // Form validation
+            els.conversationName.addEventListener('input', updateOkButton);
+            
+            // Close modal when clicking outside
+            els.newMessageModal.addEventListener('click', function(e) {
+                if (e.target === els.newMessageModal) {
+                    closeNewMessageModal();
+                }
+            });
+        }
+
+        // Make functions globally accessible for onclick handlers
+        window.toggleUser = toggleUser;
+        window.removeSelectedUser = removeSelectedUser;
+
         els.claimBtn.addEventListener('click', claim);
         
         // Allow Enter key to submit
@@ -210,7 +1416,7 @@
             }
         });
         
-        renderState();
+        initializeApp();
     })();
     </script>
 </body>

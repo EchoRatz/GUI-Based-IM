@@ -49,6 +49,7 @@ func main() {
 	// 🔐 auth (must be present)
 	r.POST("/claim", ClaimUsernameHandler(client))
 	r.GET("/me", AuthRequired(), MeHandler())
+	r.GET("/users", AuthRequired(), ListUsersHandler(client))
 
 	// Conversation endpoints
 	r.POST("/conversations", AuthRequired(), CreateConverHandler(client))
