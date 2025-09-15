@@ -145,6 +145,7 @@ func SendMessageHandler(client *mongo.Client) gin.HandlerFunc {
 // Returns newest -> oldest (reverse-chronological)
 func ListMessagesHandler(client *mongo.Client) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		// auth & params
 		uidHex, _ := c.Get("uid")
 		uid, err := mustOID(uidHex.(string))
 		if err != nil {
@@ -158,7 +159,7 @@ func ListMessagesHandler(client *mongo.Client) gin.HandlerFunc {
 			return
 		}
 
-		// Parse pagination
+		// pagination
 		limit := 50
 		if s := c.Query("limit"); s != "" {
 			if n, err := strconv.Atoi(s); err == nil && n > 0 {
@@ -168,7 +169,17 @@ func ListMessagesHandler(client *mongo.Client) gin.HandlerFunc {
 				limit = n
 			}
 		}
-		var before int64 = time.Now().UnixMilli() + 1 // include latest when not provided
+
+		// NEW: since (optional) — fetch only newer than this ts
+		var since *int64
+		if s := c.Query("since"); s != "" {
+			if n, err := strconv.ParseInt(s, 10, 64); err == nil && n > 0 {
+				since = &n
+			}
+		}
+
+		// existing: before (for reverse-chron paging)
+		var before int64 = time.Now().UnixMilli() + 1
 		if s := c.Query("before"); s != "" {
 			if n, err := strconv.ParseInt(s, 10, 64); err == nil && n > 0 {
 				before = n
@@ -179,6 +190,7 @@ func ListMessagesHandler(client *mongo.Client) gin.HandlerFunc {
 		defer cancel()
 		db := getDB(client)
 
+		// membership gate
 		ok, err := isMember(ctx, db, cid, uid)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "db error"})
@@ -189,12 +201,19 @@ func ListMessagesHandler(client *mongo.Client) gin.HandlerFunc {
 			return
 		}
 
+		// Build filter:
+		// - if since provided, use ts > since (to get *new* messages)
+		// - else use ts < before (your original reverse-chron window)
+		filter := bson.M{"conversation_id": cid}
+		if since != nil {
+			filter["ts"] = bson.M{"$gt": *since}
+		} else {
+			filter["ts"] = bson.M{"$lt": before}
+		}
+
 		cur, err := db.Collection("messages").Find(
 			ctx,
-			bson.M{
-				"conversation_id": cid,
-				"ts":              bson.M{"$lt": before},
-			},
+			filter,
 			options.Find().
 				SetSort(bson.D{{Key: "ts", Value: -1}}).
 				SetLimit(int64(limit)),
