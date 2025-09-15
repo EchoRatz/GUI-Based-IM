@@ -268,7 +268,7 @@ func ListConverHandler(client *mongo.Client) gin.HandlerFunc {
 		// 2, load receipt for this user across all those conv -> map[cid]last_read_ts
 		recCur, err := db.Collection("receipts").Find(ctx, bson.M{
 			"user_id":         uid,
-			"conversation_id": bson.M{"&in": ids},
+			"conversation_id": bson.M{"$in": ids},
 		})
 		if err != nil {
 			c.JSON(500, gin.H{"error": "db error"})
