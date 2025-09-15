@@ -137,6 +137,19 @@ func SendMessageHandler(client *mongo.Client) gin.HandlerFunc {
 			return
 		}
 		msg.ID = res.InsertedID.(primitive.ObjectID)
+
+		// boradcast to connected clients in this conversation
+		broadcaster.Publish(Event{
+			Type:           "message.created",
+			ConversationID: cid.Hex(),
+			Payload: gin.H{
+				"id":        msg.ID.Hex(),
+				"sender_id": uid.Hex(),
+				"type":      msg.Type,
+				"body":      msg.Body,
+				"ts":        msg.Ts,
+			},
+		})
 		c.JSON(http.StatusCreated, msg)
 	}
 }
