@@ -63,6 +63,9 @@ func main() {
 	r.POST("/conversations/:cid/read", AuthRequired(), MarkReadHandler(client))
 	r.GET("/conversations/:cid/unread", AuthRequired(), UnreadCountHandler(client))
 
+	// websockets
+	r.GET("/ws/:cid", WSHandler(client))
+
 	// Local Port
 	r.Run(":8080")
 }

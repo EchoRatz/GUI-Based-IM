@@ -103,6 +103,17 @@ func MarkReadHandler(client *mongo.Client) gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "db error"})
 			return
 		}
+
+		// broadcast that this user advanced their read position
+		broadcaster.Publish(Event{
+			Type:           "receipt.updated",
+			ConversationID: cid.Hex(),
+			Payload: gin.H{
+				"user_id":      uid.Hex(),
+				"last_read_ts": newTs,
+			},
+		})
+
 		c.JSON(http.StatusOK, gin.H{"ok": true, "last_read_ts": newTs})
 	}
 }
