@@ -118,12 +118,19 @@ var upgrader = websocket.Upgrader{
 }
 
 // parse&verify Bearer token
+// add this helper or modify parseBearer
 func parseBearer(c *gin.Context) (*Claims, error) {
 	h := c.GetHeader("Authorization")
-	if len(h) < 8 || h[:7] != "Bearer " {
-		return nil, jwt.ErrTokenMalformed
+	var tok string
+	if len(h) >= 8 && h[:7] == "Bearer " {
+		tok = h[7:]
+	} else {
+		// NEW: support token via query for browser WS
+		tok = c.Query("token")
+		if tok == "" {
+			return nil, jwt.ErrTokenMalformed
+		}
 	}
-	tok := h[7:]
 	var claims Claims
 	_, err := jwt.ParseWithClaims(tok, &claims, func(t *jwt.Token) (interface{}, error) {
 		return jwtSecret(), nil

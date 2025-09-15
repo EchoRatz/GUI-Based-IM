@@ -1018,28 +1018,37 @@
 
         function connectWS(cid) {
             const WS_BASE = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
-                ? 'ws://localhost:8080'
-                : 'wss://gui-based-im.onrender.com';
+            ? 'ws://localhost:8080'
+            : 'wss://gui-based-im.onrender.com';
+
+            // Put the token on the querystring
+            const token = encodeURIComponent(getToken());
+            const url = `${WS_BASE}/ws/${cid}?token=${token}`;
+
             if (window.WS) { try { window.WS.close(); } catch(_){} window.WS = null; }
-            window.WS = new Websocket(url);
+            window.WS = new WebSocket(url); // capital S ✅
+
             window.WS.onmessage = (ev) => {
                 try {
-                    const e = JSON.parse(ev.data);
-                    if (e.type === 'message.created' && e.data?.conversation_id === cid) {
-                        const msg = {
-                            id: e.payload.id,
-                            sender: 'Member',
-                            senderId: e.payload.sender_id,
-                            content: e.payload.body,
-                            timestamp: new Date(e.payload.ts),
-                            isSent: e.payload.sender_id === currentUserId
-                        };
-                        renderMessage(e.data);
-                    }
-                } catch {} 
+                const e = JSON.parse(ev.data);
+                // backend sends: { type, conversation_id, payload } 
+                if (e.type === 'message.created' && e.conversation_id === cid) {
+                    const p = e.payload;
+                    const msg = {
+                    id: p.id,
+                    sender: getUsernameFromId?.(p.sender_id) || 'User',
+                    senderId: p.sender_id,
+                    content: p.body,
+                    timestamp: new Date(p.ts),
+                    isSent: p.sender_id === currentUserId
+                    };
+                    renderMessages([...(currentMessages || []), msg]);
+                }
+                } catch {}
             };
             window.WS.onclose = () => setTimeout(() => connectWS(cid), 1500);
         }
+
 
         async function selectConversation(conversationId) {
             currentConversationId = conversationId;
