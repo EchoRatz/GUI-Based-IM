@@ -667,7 +667,7 @@
     <div class="modal-overlay" id="newMessageModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 class="modal-title">New Message</h3>
+                <h3 class="modal-title">New Conversation</h3>
                 <button class="close-btn" id="closeModalBtn">&times;</button>
             </div>
             
@@ -677,17 +677,8 @@
             </div>
             
             <div class="form-group">
-                <label class="form-label" for="memberSearch">Member:</label>
-                <input type="text" class="form-input" id="memberSearch" placeholder="Search users...">
-            </div>
-            
-            <div class="user-list" id="userList">
-                <!-- User list will be populated here -->
-            </div>
-            
-            <div class="selected-members" id="selectedMembers" style="display: none;">
-                <h4>Selected Members:</h4>
-                <div id="selectedMembersList"></div>
+                <label class="form-label" for="memberUsernames">Member (comma-separated usernames):</label>
+                <input type="text" class="form-input" id="memberUsernames" placeholder="Search users...">
             </div>
             
             <div class="modal-actions">
@@ -716,6 +707,7 @@
             newMessageModal: document.getElementById('newMessageModal'),
             closeModalBtn: document.getElementById('closeModalBtn'),
             conversationName: document.getElementById('conversationName'),
+            memberUsernames: document.getElementById('memberUsernames'),
             memberSearch: document.getElementById('memberSearch'),
             userList: document.getElementById('userList'),
             selectedMembers: document.getElementById('selectedMembers'),
@@ -798,9 +790,9 @@
             els.conversationPage.classList.add('active');
             document.body.style.background = '#1a1a1a';
             // Load users first
-            loadUsers();
+            // loadUsers();
             // Initialize username mapping
-            initializeUsernameMap();
+            // initializeUsernameMap();
             // Load conversations and setup event listeners
             await loadConversations();
             setupConversationEventListeners();
@@ -858,7 +850,7 @@
         // Username mapping for user IDs
         let usernameMap = new Map();
 
-        function initializeUsernameMap() {
+        /*function initializeUsernameMap() {
             // Add current user to the mapping
             if (currentUserId && currentUser) {
                 usernameMap.set(currentUserId, currentUser);
@@ -888,7 +880,7 @@
             Object.entries(realUserMappings).forEach(([objectId, username]) => {
                 usernameMap.set(objectId, username);
             });
-        }
+        } */
 
         function getUsernameFromId(userId) {
             // Debug: Log the user ID to help us identify patterns
@@ -1024,6 +1016,31 @@
             });
         }
 
+        function connectWS(cid) {
+            const WS_BASE = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+                ? 'ws://localhost:8080'
+                : 'wss://gui-based-im.onrender.com';
+            if (window.WS) { try { window.WS.close(); } catch(_){} window.WS = null; }
+            window.WS = new Websocket(url);
+            window.WS.onmessage = (ev) => {
+                try {
+                    const e = JSON.parse(ev.data);
+                    if (e.type === 'message.created' && e.data?.conversation_id === cid) {
+                        const msg = {
+                            id: e.payload.id,
+                            sender: 'Member',
+                            senderId: e.payload.sender_id,
+                            content: e.payload.body,
+                            timestamp: new Date(e.payload.ts),
+                            isSent: e.payload.sender_id === currentUserId
+                        };
+                        renderMessage(e.data);
+                    }
+                } catch {} 
+            };
+            window.WS.onclose = () => setTimeout(() => connectWS(cid), 1500);
+        }
+
         async function selectConversation(conversationId) {
             currentConversationId = conversationId;
             const conversation = conversations.find(c => c.id === conversationId);
@@ -1040,6 +1057,7 @@
             
             // Load messages for this conversation
             await loadMessages(conversationId);
+            connectWS(conversationId);
         }
 
         async function loadMessages(conversationId) {
@@ -1082,7 +1100,7 @@
             }
         }
 
-        function renderMessages(messages) {
+        /*function renderMessages(messages) {
             els.messagesContainer.innerHTML = '';
             
             if (messages.length === 0) {
@@ -1101,7 +1119,7 @@
                 `;
                 els.messagesContainer.appendChild(emptyState);
                 return;
-            }
+            } 
             
             messages.forEach(message => {
                 const messageEl = document.createElement('div');
@@ -1124,6 +1142,25 @@
             
             // Scroll to bottom
             els.messagesContainer.scrollTop = els.messagesContainer.scrollHeight;
+        } */
+
+        function renderMessage(m) {
+            const mine = (m.sender_id == ME.user_id);
+            const who = mine ? 'You' : 'Member';
+            const li = document.createElement('div');
+            li.className = mine ? 'msg mine' : 'msg theirs';
+            li.innerHTML = `
+                <div class="bubble">
+                    <div class="meta"><strong>${who}</strong> • ${new Date(m.ts).toLocaleTimeString()}</div>
+                    <div class="body">${escapeHTML(m.body)}</div>
+                </div>
+            `;
+            document.getElementById('messagesContainer').appendChild(li);
+            li.scrollIntoView({ behavior: 'smooth', bloack: 'end' });
+        }
+
+        function escapeHTML(s) {
+            return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
         }
 
         async function sendMessage() {
@@ -1184,17 +1221,15 @@
         function openNewMessageModal() {
             // Reset modal state
             els.conversationName.value = '';
-            els.memberSearch.value = '';
-            selectedUsers = [];
-            filteredUsers = [...allUsers];
-            
-            // Load users (mock data for now)
-            loadUsers();
+            if (els.memberUsernames) els.memberUsernames.value = '';
             
             // Show modal
             els.newMessageModal.classList.add('active');
             
             // Focus on conversation name input
+            els.conversationName.focus();
+
+            // Enable/disable OK button based on title only
             els.conversationName.focus();
         }
 
@@ -1202,7 +1237,7 @@
             els.newMessageModal.classList.remove('active');
         }
 
-        async function loadUsers() {
+        /* async function loadUsers() {
             try {
                 const response = await fetch(apiBase + '/users', {
                     method: 'GET',
@@ -1242,7 +1277,7 @@
                 filteredUsers = [];
                 renderUserList();
             }
-        }
+        } */
 
         function renderUserList() {
             els.userList.innerHTML = '';
@@ -1315,8 +1350,7 @@
 
         function updateOkButton() {
             const hasName = els.conversationName.value.trim().length > 0;
-            const hasMembers = selectedUsers.length > 0;
-            els.okBtn.disabled = !(hasName && hasMembers);
+            els.okBtn.disabled = !hasName;
         }
 
         function searchUsers() {
@@ -1329,49 +1363,36 @@
         }
 
         async function createNewConversation() {
-            const conversationName = els.conversationName.value.trim();
-            if (!conversationName || selectedUsers.length === 0) return;
-            
-            try {
-                const members = selectedUsers.map(u => u.id); // Use user IDs from database
-                
-                const response = await fetch(apiBase + '/conversations', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + getToken()
-                    },
-                    body: JSON.stringify({
-                        title: conversationName,
-                        members: members
-                    })
-                });
-                
-                if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.error || 'Failed to create conversation');
-                }
-                
-                const newConv = await response.json();
-                
-                // Convert backend response to frontend format
-                const frontendConv = {
-                    id: newConv.id,
-                    name: newConv.title,
-                    members: newConv.members,
-                    lastMessage: 'No messages yet'
-                };
-                
-                conversations.unshift(frontendConv);
-                renderConversationList();
-                selectConversation(frontendConv.id);
-                closeNewMessageModal();
-                
-                console.log('Created conversation:', newConv);
-            } catch (error) {
-                console.error('Error creating conversation:', error);
-                alert('Failed to create conversation: ' + error.message);
+            const title = els.conversationName.value.trim();
+            if(!title) {
+                alert('Please enter a conversation name');
+                return;
             }
+
+            // Parse comma-separeted usernames
+            const members = (els.memberUsernames?.value || '')
+                .split(',')
+                .map(s => s.trim())
+                .filter(Boolean);
+
+            const conversation = await api('/conversations', {
+                method: 'POST',
+                body: JSON.stringify({
+                    title,
+                    members: selectedUsers.map(u => u.username)
+                })
+            });
+
+            const fronendConv = {
+                ...conversation,
+                lastMessage: null,
+                unread: 0
+            };
+
+            conversations.unshift(frontendConv);
+            renderConversationList();
+            selectConversation(frontendConv.id);
+            closeNewMessageModal();
         }
 
         function setupConversationEventListeners() {
@@ -1389,9 +1410,6 @@
             els.closeModalBtn.addEventListener('click', closeNewMessageModal);
             els.backBtn.addEventListener('click', closeNewMessageModal);
             els.okBtn.addEventListener('click', createNewConversation);
-            
-            // Search functionality
-            els.memberSearch.addEventListener('input', searchUsers);
             
             // Form validation
             els.conversationName.addEventListener('input', updateOkButton);
