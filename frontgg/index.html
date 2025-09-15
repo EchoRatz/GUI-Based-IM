@@ -798,9 +798,9 @@
             els.conversationPage.classList.add('active');
             document.body.style.background = '#1a1a1a';
             // Load users first
-            loadUsers();
+            await loadUsers();
             // Initialize username mapping
-            initializeUsernameMap();
+            await initializeUsernameMap();
             // Load conversations and setup event listeners
             await loadConversations();
             setupConversationEventListeners();
@@ -858,37 +858,45 @@
         // Username mapping for user IDs
         let usernameMap = new Map();
 
-        function initializeUsernameMap() {
-            // Add current user to the mapping
+        // Replace your current initializeUsernameMap() with this:
+        async function initializeUsernameMap() {
+            // fresh map
+            usernameMap = new Map();
+
+            // map current user (if known)
             if (currentUserId && currentUser) {
                 usernameMap.set(currentUserId, currentUser);
             }
-            
-            // Map actual MongoDB ObjectIDs to real usernames
-            // These are the real user IDs from your database logs
-            const realUserMappings = {
-                // Exact ObjectIDs from your server logs
-                '68c659292ee9f09470a4a97f': 'putter',   // From server logs
-                '68b9978621852a964aa9beab': 'kan',      // From server logs
-                '68b9978121852a964aa9beaa': 'minty',    // From server logs
-                '68b996204c3f1c52b45fd18d': 'alex',     // From server logs
-                // Add more mappings as needed
-                '68c659292ee9f09470a4a980': 'sarah',
-                '68c659292ee9f09470a4a981': 'john',
-                '68c659292ee9f09470a4a982': 'emma'
-            };
-            
-            // Also add a global function to easily add new mappings
+
+            // optional: fetch full user list if your backend exposes GET /users
+            try {
+                const res = await fetch(apiBase + '/users', {
+                headers: { Authorization: 'Bearer ' + getToken() }
+                });
+                if (res.ok) {
+                const data = await res.json();
+                // support both shapes: {users:[...]} or [...]
+                const users = Array.isArray(data) ? data : (data.users || []);
+                users.forEach(u => {
+                    // expect each user like { id: "...", username: "kan" }
+                    if (u?.id && u?.username) {
+                    usernameMap.set(u.id, u.username);
+                    }
+                });
+                } else {
+                console.warn('GET /users not available (status ' + res.status + '), skipping username preload');
+                }
+            } catch (e) {
+                console.warn('Skipped username preload (network/error):', e);
+            }
+
+            // optional helper to add entries dynamically
             window.addUserMapping = function(userId, username) {
                 usernameMap.set(userId, username);
                 console.log(`Added mapping: ${userId} -> ${username}`);
             };
-            
-            // Set up the mappings
-            Object.entries(realUserMappings).forEach(([objectId, username]) => {
-                usernameMap.set(objectId, username);
-            });
         }
+
 
         function getUsernameFromId(userId) {
             // Debug: Log the user ID to help us identify patterns
@@ -1333,7 +1341,7 @@
             if (!conversationName || selectedUsers.length === 0) return;
             
             try {
-                const members = selectedUsers.map(u => u.id); // Use user IDs from database
+                const members = selectedUsers.map(u => u.username); // Use user IDs from database
                 
                 const response = await fetch(apiBase + '/conversations', {
                     method: 'POST',
