@@ -1032,23 +1032,46 @@
             });
         }
 
+        let ws = null;
+
         async function selectConversation(conversationId) {
             currentConversationId = conversationId;
             const conversation = conversations.find(c => c.id === conversationId);
-            
-            // Update UI
-            document.querySelectorAll('.conversation-item').forEach(item => {
-                item.classList.remove('active');
+
+            // cleanup old socket
+            if (ws) { ws.close(); }
+
+            // connect to websocket for this conversation
+            ws = new WebSocket(`${apiBase.replace('http', 'ws')}/ws/${conversationId}`, [], {
+                headers: { Authorization: 'Bearer ' + getToken() }
             });
-            document.querySelector(`[data-conversation-id="${conversationId}"]`).classList.add('active');
-            
-            els.currentConversationTitle.textContent = conversation.name;
-            els.messageInput.disabled = false;
-            els.sendBtn.disabled = false;
-            
-            // Load messages for this conversation
+
+            ws.onopen = () => {
+                console.log("🔌 WS connected to", conversationId);
+            };
+
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                if (data.type === "message.created" && data.conversation_id === conversationId) {
+                    const senderId = data.payload.sender_id;
+                    const username = getUsernameFromId(senderId);
+                    renderMessages([{
+                        id: data.payload.id,
+                        sender: username,
+                        senderId: senderId,
+                        content: data.payload.body,
+                        timestamp: new Date(data.payload.ts),
+                        isSent: senderId === currentUserId
+                    }], true);
+                }
+            };
+
+            ws.onclose = () => console.log("WS closed");
+
+            // load history as before
             await loadMessages(conversationId);
         }
+
 
         async function loadMessages(conversationId) {
             try {
@@ -1090,35 +1113,15 @@
             }
         }
 
-        function renderMessages(messages) {
-            els.messagesContainer.innerHTML = '';
-            
-            if (messages.length === 0) {
-                // Show empty state message
-                const emptyState = document.createElement('div');
-                emptyState.style.cssText = `
-                    text-align: center;
-                    color: #888;
-                    font-size: 14px;
-                    margin-top: 50px;
-                    padding: 20px;
-                `;
-                emptyState.innerHTML = `
-                    <div>No messages yet</div>
-                    <div style="margin-top: 8px; font-size: 12px;">Start the conversation by sending a message</div>
-                `;
-                els.messagesContainer.appendChild(emptyState);
-                return;
+        function renderMessages(messages, append = false) {
+            if (!append) {
+                els.messagesContainer.innerHTML = '';
             }
-            
             messages.forEach(message => {
                 const messageEl = document.createElement('div');
                 messageEl.className = `message ${message.isSent ? 'sent' : ''}`;
-                
-                // For sent messages, use current user's name, for received messages use sender ID or "User"
                 const senderName = message.isSent ? currentUser : (message.sender || 'User');
                 const senderInitial = senderName.charAt(0).toUpperCase();
-                
                 messageEl.innerHTML = `
                     <div class="message-avatar">${senderInitial}</div>
                     <div>
@@ -1126,64 +1129,27 @@
                         <div class="message-content">${message.content}</div>
                     </div>
                 `;
-                
                 els.messagesContainer.appendChild(messageEl);
             });
-            
-            // Scroll to bottom
             els.messagesContainer.scrollTop = els.messagesContainer.scrollHeight;
         }
 
+
         async function sendMessage() {
-            const messageText = els.messageInput.value.trim();
-            if (!messageText || !currentConversationId) return;
-            
-            try {
-                // Send message to backend API
-                const response = await fetch(apiBase + '/messages/' + currentConversationId, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + getToken()
-                    },
-                    body: JSON.stringify({
-                        type: 'text',
-                        body: messageText
-                    })
-                });
-                
-                if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.error || 'Failed to send message');
-                }
-                
-                const newMessage = await response.json();
-                
-                // Add message to UI
-                const messageEl = document.createElement('div');
-                messageEl.className = 'message sent';
-                
-                const userInitial = (currentUser || 'You').charAt(0).toUpperCase();
-                messageEl.innerHTML = `
-                    <div class="message-avatar">${userInitial}</div>
-                    <div>
-                        <div class="message-content">${messageText}</div>
-                    </div>
-                `;
-                
-                els.messagesContainer.appendChild(messageEl);
-                els.messageInput.value = '';
-                
-                // Scroll to bottom
-                els.messagesContainer.scrollTop = els.messagesContainer.scrollHeight;
-                
-                console.log('Message sent successfully:', newMessage);
-                
-            } catch (error) {
-                console.error('Error sending message:', error);
-                alert('Failed to send message: ' + error.message);
-            }
+            const text = els.messageInput.value.trim();
+            if (!text || !currentConversationId) return;
+
+            await fetch(apiBase + '/messages/' + currentConversationId, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + getToken()
+                },
+                body: JSON.stringify({ type: 'text', body: text })
+            });
+            els.messageInput.value = '';
         }
+
 
         function addNewConversation() {
             openNewMessageModal();
