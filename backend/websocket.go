@@ -134,11 +134,32 @@ func parseBearer(c *gin.Context) (*Claims, error) {
 	return &claims, nil
 }
 
+// add near parseBearer:
+func parseBearerOrQuery(c *gin.Context) (*Claims, error) {
+	// try Authorization header first
+	if cl, err := parseBearer(c); err == nil {
+		return cl, nil
+	}
+	// fallback: ?token=
+	tok := c.Query("token")
+	if tok == "" {
+		return nil, jwt.ErrTokenMalformed
+	}
+	var claims Claims
+	_, err := jwt.ParseWithClaims(tok, &claims, func(t *jwt.Token) (interface{}, error) {
+		return jwtSecret(), nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &claims, nil
+}
+
 // GET /ws/:cid (Authorization: Bearer <token>)
 // Upgrades to WebSocket if the user is a member of conversation
 func WSHandler(client *mongo.Client) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		claims, err := parseBearer(c)
+		claims, err := parseBearerOrQuery(c)
 		if err != nil {
 			c.AbortWithStatus(http.StatusUnauthorized)
 			return

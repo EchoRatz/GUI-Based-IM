@@ -1038,13 +1038,20 @@
             currentConversationId = conversationId;
             const conversation = conversations.find(c => c.id === conversationId);
 
-            // cleanup old socket
-            if (ws) { ws.close(); }
+            // UI: enable input & show title
+            els.currentConversationTitle.textContent = conversation?.name || 'Conversation';
+            els.messageInput.disabled = false;
+            els.sendBtn.disabled = false;
+            els.messageInput.focus();
 
-            // connect to websocket for this conversation
-            ws = new WebSocket(`${apiBase.replace('http', 'ws')}/ws/${conversationId}`, [], {
-                headers: { Authorization: 'Bearer ' + getToken() }
-            });
+            // cleanup old socket
+            if (ws) { try { ws.close(); } catch (_) {} }
+
+            // Browsers can't send custom headers on WebSocket.
+            // Use ?token= in URL instead.
+            const token = getToken();
+            const wsUrl = apiBase.replace('http', 'ws') + `/ws/${conversationId}?token=` + encodeURIComponent(token);
+            ws = new WebSocket(wsUrl);
 
             ws.onopen = () => {
                 console.log("🔌 WS connected to", conversationId);
@@ -1064,6 +1071,7 @@
                         isSent: senderId === currentUserId
                     }], true);
                 }
+                // (optional) handle receipt.updated here later
             };
 
             ws.onclose = () => console.log("WS closed");
